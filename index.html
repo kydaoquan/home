@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Kỳ Đạo Quán - Màn Hình Chờ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; background: #000; color: #d4af37; font-family: 'Cinzel', serif; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        #dustCanvas { position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none; }
+        
+        .main-wrapper { 
+            position: relative; z-index: 2; text-align: center; 
+            animation: pulse 4s infinite ease-in-out; 
+            width: 90vw; display: flex; flex-direction: column; align-items: center;
+        }
+
+        .logo-image { max-width: 200px; width: 100%; height: auto; filter: drop-shadow(0 0 5px #d4af37) drop-shadow(0 0 30px #d4af37); margin: 0 auto; display: block; }
+        .divider { width: 300px; height: 1px; background: linear-gradient(to right, transparent, #d4af37, transparent); margin: 30px auto; }
+        
+        .tagline-container { width: 100%; white-space: nowrap; overflow: hidden; display: flex; justify-content: center; }
+        .tagline { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.5rem; color: #fff; letter-spacing: 1px; opacity: 0.8; transform: scale(1); transform-origin: center; }
+        
+        .loading-dots { font-family: 'Cinzel', serif; font-size: 1.2rem; color: #d4af37; margin-top: 20px; letter-spacing: 5px; animation: blink 1.5s infinite; }
+        .border-box { position: absolute; z-index: 3; top: 5%; bottom: 5%; left: 5%; right: 5%; border: 2px solid rgba(212, 175, 55, 0.2); pointer-events: none; }
+
+       /* Nút X sát đáy hơn nữa */
+        #fsBtn {
+            position: absolute; 
+            bottom: 5px; /* Sát mép hơn */
+            left: 50%; 
+            transform: translateX(-50%);
+            z-index: 10;
+            background: transparent; 
+            border: 1px solid #d4af37; 
+            color: #d4af37;
+            padding: 2px 12px; /* Thu gọn chiều cao nút */
+            cursor: pointer; 
+            font-family: sans-serif;
+            transition: 0.3s; 
+            opacity: 0.3; /* Mờ hơn tí cho sang */
+            font-size: 0.9rem;
+            border-radius: 4px; /* Bo nhẹ góc cho đẹp */
+        }
+        #fsBtn:hover { opacity: 1; background: #d4af37; color: #000; }
+        
+        @keyframes pulse { 0%, 100% { opacity: 0.8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.02); } }
+        @keyframes blink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <canvas id="dustCanvas"></canvas>
+    <div class="border-box"></div>
+
+    <button id="fsBtn">X</button>
+
+    <div class="main-wrapper">
+        <img src="https://i.ibb.co/MDthZfp4/2011logo-truoc.png" alt="Kỳ Đạo Quán" class="logo-image">
+        <div class="divider"></div>
+        <div class="tagline-container">
+            <div class="tagline" id="textLine">Đang chuẩn bị đại chiến... Ae đợi một chút nhé!</div>
+        </div>
+        <div class="loading-dots">LOADING...</div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('fsBtn');
+        btn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                btn.textContent = "X";
+            } else {
+                document.exitFullscreen();
+                btn.textContent = "X";
+            }
+        });
+
+        function fitText() {
+            const container = document.querySelector('.tagline-container');
+            const text = document.getElementById('textLine');
+            if (text.offsetWidth > container.offsetWidth) {
+                const scale = container.offsetWidth / text.offsetWidth;
+                text.style.transform = `scale(${scale * 0.9})`;
+            }
+        }
+        window.addEventListener('resize', fitText);
+        fitText();
+
+        const canvas = document.getElementById('dustCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        let particles = Array.from({length: 200}, () => ({x: Math.random() * canvas.width, y: Math.random() * canvas.height, s: Math.random() * 2}));
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgba(212, 175, 55, 0.7)"; 
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2);
+                ctx.fill();
+                p.y -= 0.3;
+                if(p.y < 0) p.y = canvas.height;
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>
