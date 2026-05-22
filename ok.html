@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Overlay Nhận Hình</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        body { margin: 0; background: transparent; overflow: hidden; }
+        #remoteVideo { width: 100vw; height: 100vh; object-fit: cover; }
+        .control { position: fixed; bottom: 20px; left: 20px; z-index: 999; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 10px; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <video id="remoteVideo" autoplay playsinline></video>
+
+    <div class="control">
+        <input id="peer-id" placeholder="Nhập ID điện thoại...">
+        <button onclick="ketNoi()">Kết nối</button>
+        <p id="msg">Trạng thái: Sẵn sàng</p>
+    </div>
+
+    <script>
+        const peer = new Peer({
+            config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }] }
+        });
+
+        function ketNoi() {
+            const idCamera = document.getElementById('peer-id').value;
+            document.getElementById('msg').innerText = "Đang bắt tay...";
+            
+            const call = peer.call(idCamera, null);
+            call.on('stream', stream => {
+                const video = document.getElementById('remoteVideo');
+                video.srcObject = stream;
+                document.getElementById('msg').innerText = "Đã lên hình!";
+            });
+            
+            call.on('error', err => {
+                document.getElementById('msg').innerText = "Lỗi kết nối: " + err;
+            });
+        }
+    </script>
+</body>
+</html>
