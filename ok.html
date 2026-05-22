@@ -7,21 +7,25 @@
     <style>
         body { margin: 0; background: transparent; overflow: hidden; }
         #remoteVideo { width: 100vw; height: 100vh; object-fit: cover; }
-        .control { position: fixed; bottom: 20px; left: 20px; z-index: 999; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 10px; color: #fff; }
+        .panel { position: fixed; bottom: 20px; left: 20px; z-index: 999; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; color: #fff; }
     </style>
 </head>
 <body>
 
     <video id="remoteVideo" autoplay playsinline></video>
 
-    <div class="control">
+    <div class="panel">
         <input id="peer-id" placeholder="Nhập ID điện thoại...">
         <button onclick="ketNoi()">Kết nối</button>
         <p id="msg">Trạng thái: Sẵn sàng</p>
     </div>
 
     <script>
+        // Cấu hình phải giống hệt file Camera
         const peer = new Peer({
+            host: '0.peerjs.com',
+            port: 443,
+            secure: true,
             config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }] }
         });
 
@@ -37,7 +41,7 @@
             });
             
             call.on('error', err => {
-                document.getElementById('msg').innerText = "Lỗi kết nối: " + err;
+                document.getElementById('msg').innerText = "Lỗi: " + err;
             });
         }
     </script>
