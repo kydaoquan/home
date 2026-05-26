@@ -1,49 +1,130 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Overlay Nhận Hình</title>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <style>
-        body { margin: 0; background: transparent; overflow: hidden; }
-        #remoteVideo { width: 100vw; height: 100vh; object-fit: cover; }
-        .panel { position: fixed; bottom: 20px; left: 20px; z-index: 999; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; color: #fff; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Audio Sender</title>
+
+<style>
+    body{
+        margin:0;
+        background:#111;
+        color:white;
+        font-family:Arial;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        height:100vh;
+        flex-direction:column;
+        gap:15px;
+    }
+
+    select, button{
+        padding:12px;
+        border-radius:10px;
+        border:none;
+        font-size:16px;
+        min-width:320px;
+    }
+
+    button{
+        background:#00aa66;
+        color:white;
+        cursor:pointer;
+    }
+
+    iframe{
+        width:1px;
+        height:1px;
+        opacity:0;
+        border:0;
+        position:absolute;
+    }
+
+    #status{
+        opacity:.8;
+        font-size:14px;
+    }
+</style>
 </head>
 <body>
 
-    <video id="remoteVideo" autoplay playsinline></video>
+<h2>Audio Sender</h2>
 
-    <div class="panel">
-        <input id="peer-id" placeholder="Nhập ID điện thoại...">
-        <button onclick="ketNoi()">Kết nối</button>
-        <p id="msg">Trạng thái: Sẵn sàng</p>
-    </div>
+<select id="micSelect"></select>
 
-    <script>
-        // Cấu hình phải giống hệt file Camera
-        const peer = new Peer({
-            host: '0.peerjs.com',
-            port: 443,
-            secure: true,
-            config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }] }
-        });
+<button id="startBtn">
+    Start Audio
+</button>
 
-        function ketNoi() {
-            const idCamera = document.getElementById('peer-id').value;
-            document.getElementById('msg').innerText = "Đang bắt tay...";
-            
-            const call = peer.call(idCamera, null);
-            call.on('stream', stream => {
-                const video = document.getElementById('remoteVideo');
-                video.srcObject = stream;
-                document.getElementById('msg').innerText = "Đã lên hình!";
-            });
-            
-            call.on('error', err => {
-                document.getElementById('msg').innerText = "Lỗi: " + err;
-            });
-        }
-    </script>
+<div id="status"></div>
+
+<script>
+
+const micSelect = document.getElementById("micSelect");
+const statusEl = document.getElementById("status");
+
+async function loadMics(){
+
+    // xin permission trước
+    await navigator.mediaDevices.getUserMedia({ audio:true });
+
+    const devices =
+        await navigator.mediaDevices.enumerateDevices();
+
+    const mics =
+        devices.filter(d => d.kind === "audioinput");
+
+    micSelect.innerHTML = "";
+
+    mics.forEach((mic,index)=>{
+
+        const option = document.createElement("option");
+
+        option.value = mic.deviceId;
+
+        option.text =
+            mic.label || `Microphone ${index+1}`;
+
+        micSelect.appendChild(option);
+    });
+}
+
+loadMics();
+
+document
+.getElementById("startBtn")
+.onclick = ()=>{
+
+    const deviceId = micSelect.value;
+
+    const iframe = document.createElement("iframe");
+
+    iframe.allow =
+        "camera; microphone; autoplay";
+
+    iframe.src =
+        "https://vdo.ninja/?" +
+        "push=mysound" +
+        "&miconly" +
+        "&proaudio" +
+        "&stereo" +
+        "&bitrate=320" +
+        "&buffer=0" +
+        "&autostart" +
+        "&cleanoutput" +
+        "&transparent" +
+        "&audiodevice=" +
+        encodeURIComponent(deviceId);
+
+    document.body.appendChild(iframe);
+
+    statusEl.innerText =
+        "Connected with selected microphone";
+};
+
+</script>
+
 </body>
 </html>
