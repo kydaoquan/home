@@ -1,38 +1,94 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Camera Phát</title>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <style>
-        body { margin: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: white; }
-        video { width: 100%; height: 90vh; object-fit: cover; }
-        #id-display { padding: 10px; font-size: 1.2rem; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Audio Sender</title>
+
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: #111;
+        overflow: hidden;
+        font-family: Arial;
+    }
+
+    #wrap {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    iframe {
+        width: 1px;
+        height: 1px;
+        border: 0;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    #status {
+        color: white;
+        font-size: 14px;
+        opacity: 0.7;
+    }
+
+    button {
+        padding: 12px 20px;
+        border: 0;
+        border-radius: 10px;
+        background: #00aa66;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
+</style>
 </head>
+
 <body>
-    <video id="v" autoplay playsinline muted></video>
-    <div id="id-display">Đang kết nối server...</div>
 
-    <script>
-        // Cấu hình kết nối tới server ổn định
-        const peer = new Peer({
-            host: '0.peerjs.com',
-            port: 443,
-            secure: true,
-            config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }] }
-        });
+<div id="wrap">
+    <button id="startBtn">Start Audio</button>
+</div>
 
-        peer.on('open', id => { document.getElementById('id-display').innerText = "ID của mày: " + id; });
+<script>
+const btn = document.getElementById("startBtn");
 
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
-            .then(stream => {
-                document.getElementById('v').srcObject = stream;
-                peer.on('call', call => {
-                    call.answer(stream);
-                });
-            })
-            .catch(err => alert("Lỗi Camera: " + err));
-    </script>
+btn.onclick = () => {
+
+    btn.remove();
+
+    const iframe = document.createElement("iframe");
+
+    iframe.allow =
+        "camera; microphone; autoplay; fullscreen; display-capture";
+
+    iframe.src =
+        "https://vdo.ninja/?push=mysound" +
+        "&miconly" +
+        "&proaudio" +
+        "&stereo" +
+        "&bitrate=320" +
+        "&buffer=0" +
+        "&autostart" +
+        "&cleanoutput" +
+        "&transparent" +
+        "&hidehome";
+
+    document.body.appendChild(iframe);
+
+    const status = document.createElement("div");
+    status.id = "status";
+    status.innerText = "Audio Connected";
+    document.getElementById("wrap").appendChild(status);
+};
+</script>
+
 </body>
 </html>
